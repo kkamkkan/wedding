@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f8f3ee" />
+  <meta name="robots" content="noindex,nofollow,noarchive" />
+  <title>WJ ♥ GY RSVP 관리자</title>
+  <style>
+    :root{
+      --paper:#f8f3ee;
+      --paper2:#fffdfb;
+      --ink:#382f2c;
+      --muted:#8e7d75;
+      --line:#eadfd9;
+      --accent:#d67f67;
+      --accent-soft:#f3ddd4;
+      --yes:#5f8673;
+      --maybe:#b58b4a;
+      --no:#9b6969;
+      --shadow:0 18px 45px rgba(69,47,39,.08);
+      --radius:24px;
+    }
+    *{box-sizing:border-box}
+    html{background:var(--paper)}
+    body{
+      margin:0;
+      min-height:100vh;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 10% 0%,rgba(214,127,103,.10),transparent 27rem),
+        linear-gradient(180deg,#fbf7f3 0%,var(--paper) 100%);
+      font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR","Apple SD Gothic Neo",sans-serif;
+    }
+    button,input{font:inherit}
+    button{cursor:pointer}
+    .shell{width:min(1180px,calc(100% - 32px));margin:0 auto;padding:48px 0 72px}
+    .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:28px}
+    .eyebrow{font-size:11px;letter-spacing:.34em;color:var(--accent);font-weight:700;margin-bottom:9px}
+    h1{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:clamp(31px,4vw,48px);margin:0;letter-spacing:.02em}
+    .subtitle{margin:8px 0 0;color:var(--muted);font-size:14px}
+    .auth-box{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .user-pill{display:none;padding:10px 14px;border:1px solid var(--line);background:rgba(255,255,255,.72);border-radius:999px;font-size:12px;color:var(--muted)}
+    .btn{border:1px solid var(--line);border-radius:999px;padding:10px 16px;background:#fff;color:var(--ink);transition:.2s ease}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(69,47,39,.08)}
+    .btn.primary{border-color:var(--accent);background:var(--accent);color:#fff}
+    .btn.ghost{background:rgba(255,255,255,.55)}
+    .card{background:rgba(255,255,255,.78);border:1px solid rgba(226,211,202,.9);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(14px)}
+    .login-card{padding:30px;text-align:center;margin-top:36px}
+    .login-symbol{font-family:Georgia,serif;color:var(--accent);font-size:26px;margin-bottom:6px}
+    .login-card h2{margin:5px 0 8px;font-size:21px;font-weight:600}
+    .login-card p{margin:0 auto 20px;max-width:540px;color:var(--muted);font-size:13px;line-height:1.7}
+    .dashboard[hidden],.login-card[hidden],.setup-card[hidden]{display:none!important}
+    .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0}
+    .metric{padding:22px 20px}
+    .metric-label{font-size:12px;color:var(--muted);margin-bottom:9px}
+    .metric-value{font-family:Georgia,serif;font-size:34px;line-height:1}
+    .metric small{font-size:11px;color:var(--muted);margin-left:4px}
+    .metric.yes .metric-value{color:var(--yes)}
+    .metric.maybe .metric-value{color:var(--maybe)}
+    .metric.no .metric-value{color:var(--no)}
+    .section-head{display:flex;justify-content:space-between;align-items:end;gap:15px;margin:34px 2px 14px}
+    .section-head h2{margin:0;font-size:20px;font-weight:600}
+    .section-head p{margin:5px 0 0;color:var(--muted);font-size:12px}
+    .live{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted)}
+    .live-dot{width:7px;height:7px;border-radius:50%;background:#8aac9a;box-shadow:0 0 0 5px rgba(138,172,154,.12)}
+    .host-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .host-card{padding:20px;border:1px solid var(--line);background:rgba(255,255,255,.78);border-radius:20px;text-align:left;color:var(--ink);transition:.2s ease;width:100%}
+    .host-card:hover,.host-card.active{border-color:rgba(214,127,103,.7);transform:translateY(-2px);box-shadow:0 12px 30px rgba(69,47,39,.07)}
+    .host-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .host-name{font-size:17px;font-weight:650}
+    .host-total{font-family:Georgia,serif;font-size:22px;color:var(--accent)}
+    .host-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .host-stat{border-top:1px solid var(--line);padding-top:9px}
+    .host-stat b{display:block;font-family:Georgia,serif;font-size:20px;font-weight:400}
+    .host-stat span{font-size:10px;color:var(--muted)}
+    .host-stat.yes b{color:var(--yes)} .host-stat.maybe b{color:var(--maybe)} .host-stat.no b{color:var(--no)}
+    .list-card{overflow:hidden}
+    .toolbar{padding:16px;border-bottom:1px solid var(--line);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .search{flex:1;min-width:190px;border:1px solid var(--line);border-radius:999px;padding:11px 15px;background:#fff;color:var(--ink);outline:none}
+    .search:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(214,127,103,.10)}
+    .filter-group{display:flex;gap:6px;flex-wrap:wrap}
+    .filter{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 12px;color:var(--muted);font-size:12px}
+    .filter.active{background:var(--ink);border-color:var(--ink);color:#fff}
+    .table-wrap{overflow:auto}
+    table{width:100%;border-collapse:collapse;min-width:720px}
+    th,td{padding:15px 18px;text-align:left;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
+    th{font-size:11px;color:var(--muted);font-weight:600;background:rgba(250,246,243,.78);position:sticky;top:0}
+    tbody tr:hover{background:rgba(248,243,238,.65)}
+    .name{font-weight:650}
+    .badge{display:inline-flex;align-items:center;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:650}
+    .badge.yes{background:rgba(95,134,115,.12);color:var(--yes)}
+    .badge.maybe{background:rgba(181,139,74,.13);color:var(--maybe)}
+    .badge.no{background:rgba(155,105,105,.12);color:var(--no)}
+    .chips{display:flex;flex-wrap:wrap;gap:5px}
+    .chip{font-size:10px;padding:5px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted);background:#fff}
+    .empty{padding:56px 20px;text-align:center;color:var(--muted);font-size:13px}
+    .setup-card{padding:26px;margin-top:22px}
+    .setup-card h2{font-size:19px;margin:0 0 8px}
+    .setup-card p{font-size:13px;line-height:1.7;color:var(--muted)}
+    .uid-box{display:flex;gap:8px;align-items:center;margin:15px 0;flex-wrap:wrap}
+    .uid{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;padding:11px 12px;background:#fff;border:1px solid var(--line);border-radius:10px;word-break:break-all;flex:1;min-width:240px}
+    details{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+    summary{cursor:pointer;font-size:13px;font-weight:600}
+    pre{white-space:pre-wrap;word-break:break-word;background:#2d2927;color:#f9f4ef;padding:16px;border-radius:14px;overflow:auto;font-size:11px;line-height:1.65}
+    .footer{text-align:center;margin-top:28px;color:#b3a39b;font-size:10px;letter-spacing:.16em}
+    .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#352f2c;color:#fff;padding:11px 15px;border-radius:999px;font-size:12px;transition:.25s ease;z-index:20;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    @media(max-width:820px){
+      .shell{width:min(100% - 22px,720px);padding-top:28px}
+      .topbar{display:block}.auth-box{justify-content:flex-start;margin-top:18px}
+      .summary-grid{grid-template-columns:repeat(2,1fr)}
+      .host-grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media(max-width:520px){
+      .shell{width:calc(100% - 18px);padding-bottom:48px}
+      .summary-grid{gap:9px}.metric{padding:17px 15px}.metric-value{font-size:29px}
+      .host-grid{grid-template-columns:1fr;gap:9px}
+      .toolbar{align-items:stretch}.search{width:100%;flex-basis:100%}
+      .filter-group{width:100%}.filter{flex:1;text-align:center;padding-inline:7px}
+      .section-head{align-items:flex-start}.live{margin-top:4px}
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">WEDDING RSVP</div>
+        <h1>WJ ♥ GY Guest List</h1>
+        <p class="subtitle">2027.05.01 · 16:20 · DMC타워웨딩 3F 라피네홀</p>
+      </div>
+      <div class="auth-box">
+        <div class="user-pill" id="userPill"></div>
+        <button class="btn ghost" id="logoutBtn" hidden>로그아웃</button>
+      </div>
+    </header>
+
+    <section class="card login-card" id="loginCard">
+      <div class="login-symbol">◇</div>
+      <h2>RSVP 관리자 로그인</h2>
+      <p>하객의 참석 여부와 손님 명단은 개인정보가 포함되어 있어 관리자 Google 계정으로 로그인한 뒤에만 표시됩니다.</p>
+      <button class="btn primary" id="loginBtn">Google로 관리자 로그인</button>
+      <p id="loginStatus" style="margin-top:13px"></p>
+    </section>
+
+    <section class="card setup-card" id="setupCard" hidden>
+      <h2>관리자 권한 설정이 한 번 필요합니다</h2>
+      <p>Google 로그인은 성공했지만 Firestore에서 RSVP를 읽을 권한이 없습니다. 아래 UID를 Firebase의 <b>wedding_admins</b> 컬렉션에 문서 ID로 등록한 뒤, 하단의 보안 규칙을 적용하면 이 계정만 관리자 화면을 볼 수 있습니다.</p>
+      <div class="uid-box">
+        <div class="uid" id="adminUid">-</div>
+        <button class="btn" id="copyUid">UID 복사</button>
+      </div>
+      <p style="margin:0">Firestore → 데이터 → 컬렉션 시작 → <b>wedding_admins</b> → 문서 ID에 위 UID 입력 → 임의 필드 하나(예: <code>role = admin</code>) 저장</p>
+      <details>
+        <summary>필요한 Firestore 보안 규칙 보기</summary>
+        <pre id="rulesPreview"></pre>
+      </details>
+    </section>
+
+    <section class="dashboard" id="dashboard" hidden>
+      <div class="summary-grid">
+        <article class="card metric"><div class="metric-label">전체 응답</div><div class="metric-value"><span id="totalCount">0</span><small>명</small></div></article>
+        <article class="card metric yes"><div class="metric-label">참석 Yes</div><div class="metric-value"><span id="yesCount">0</span><small>명</small></div></article>
+        <article class="card metric maybe"><div class="metric-label">아직..</div><div class="metric-value"><span id="maybeCount">0</span><small>명</small></div></article>
+        <article class="card metric no"><div class="metric-label">불참 No</div><div class="metric-value"><span id="noCount">0</span><small>명</small></div></article>
+      </div>
+
+      <div class="section-head">
+        <div><h2>사람별 손님 현황</h2><p>각 카드를 누르면 아래 명단이 해당 손님만 표시됩니다.</p></div>
+        <div class="live"><span class="live-dot"></span>Firebase 실시간 반영</div>
+      </div>
+      <div class="host-grid" id="hostGrid"></div>
+
+      <div class="section-head">
+        <div><h2 id="listTitle">전체 손님 리스트</h2><p id="listSub">응답자 0명</p></div>
+        <button class="btn" id="exportBtn">CSV 저장</button>
+      </div>
+      <section class="card list-card">
+        <div class="toolbar">
+          <input class="search" id="searchInput" type="search" placeholder="이름으로 검색" autocomplete="off" />
+          <div class="filter-group" id="statusFilters">
+            <button class="filter active" data-status="all">전체</button>
+            <button class="filter" data-status="yes">참석</button>
+            <button class="filter" data-status="maybe">아직</button>
+            <button class="filter" data-status="no">불참</button>
+          </div>
+          <button class="filter" id="clearHost" hidden>사람 필터 해제 ×</button>
+        </div>
+        <div class="table-wrap" id="tableWrap">
+          <table>
+            <thead><tr><th>이름</th><th>참석 여부</th><th>누구의 손님</th><th>응답 시간</th></tr></thead>
+            <tbody id="guestRows"></tbody>
+          </table>
+          <div class="empty" id="emptyState" hidden>조건에 맞는 응답이 없습니다.</div>
+        </div>
+      </section>
+    </section>
+
+    <div class="footer">COPYRIGHT © WONJONG & GAYOUNG · ADMIN</div>
+  </main>
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyCkxVxItfmTAwDkEhb_tnwgBJAH_yBPuHA",
+      authDomain: "wedding-adcb0.firebaseapp.com",
+      projectId: "wedding-adcb0",
+      storageBucket: "wedding-adcb0.firebasestorage.app",
+      messagingSenderId: "778466987777",
+      appId: "1:778466987777:web:76b81fe3265a3a3cfd1500",
+      measurementId: "G-BYVSX42M1P"
+    };
+    const SDK = "12.18.0";
+    const base = `https://www.gstatic.com/firebasejs/${SDK}`;
+    const [{initializeApp},{getAuth,GoogleAuthProvider,onAuthStateChanged,signInWithPopup,signInWithRedirect,signOut},{getFirestore,collection,query,orderBy,onSnapshot}] = await Promise.all([
+      import(`${base}/firebase-app.js`),
+      import(`${base}/firebase-auth.js`),
+      import(`${base}/firebase-firestore.js`)
+    ]);
+
+    const app = initializeApp(FIREBASE_CONFIG);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({prompt:"select_account"});
+
+    const HOSTS = ["이규영","공정님","이원종","고윤석","백미나","고가영"];
+    const STATUS_LABEL = {yes:"참석",maybe:"아직..",no:"불참"};
+    let allRows = [];
+    let hostFilter = "";
+    let statusFilter = "all";
+    let unsubscribe = null;
+
+    const $ = s => document.querySelector(s);
+    const loginCard = $("#loginCard"), setupCard = $("#setupCard"), dashboard = $("#dashboard");
+    const loginBtn = $("#loginBtn"), logoutBtn = $("#logoutBtn"), userPill = $("#userPill"), loginStatus = $("#loginStatus");
+    const hostGrid = $("#hostGrid"), rowsEl = $("#guestRows"), emptyState = $("#emptyState");
+    const searchInput = $("#searchInput"), listTitle = $("#listTitle"), listSub = $("#listSub"), clearHost = $("#clearHost");
+    const toast = $("#toast");
+
+    const ADMIN_RULES = `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/wedding_admins/$(request.auth.uid));
+    }
+
+    // 축하 메시지
+    match /wedding_guestbook/{messageId} {
+      allow read: if true;
+
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasAll([
+          'name', 'message', 'authorUid', 'createdAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'name', 'message', 'authorUid', 'createdAt'
+        ])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 12
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 120
+        && request.resource.data.authorUid is string
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.createdAt == request.time;
+
+      allow update, delete: if false;
+    }
+
+    // RSVP: 하객은 자신의 익명 UID 문서만 생성/수정, 관리자는 전체 조회 가능
+    match /wedding_rsvp/{responseId} {
+      allow read: if isAdmin();
+
+      allow create: if request.auth != null
+        && responseId == request.auth.uid
+        && request.resource.data.keys().hasAll([
+          'attendance', 'name', 'hosts', 'adultCount', 'childCount', 'authorUid', 'submittedAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'attendance', 'name', 'hosts', 'adultCount', 'childCount', 'authorUid', 'submittedAt'
+        ])
+        && request.resource.data.attendance is string
+        && request.resource.data.attendance in ['yes', 'maybe', 'no']
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 12
+        && request.resource.data.hosts is list
+        && request.resource.data.hosts.size() > 0
+        && request.resource.data.hosts.size() <= 6
+        && request.resource.data.hosts.hasOnly([
+          '이규영', '공정님', '이원종', '고윤석', '백미나', '고가영'
+        ])
+        && request.resource.data.adultCount is int
+        && request.resource.data.childCount is int
+        && request.resource.data.adultCount >= 0
+        && request.resource.data.childCount >= 0
+        && request.resource.data.adultCount <= 20
+        && request.resource.data.childCount <= 20
+        && (request.resource.data.adultCount + request.resource.data.childCount) <= 20
+        && (request.resource.data.attendance != 'yes'
+            || (request.resource.data.adultCount + request.resource.data.childCount) > 0)
+        && (request.resource.data.attendance != 'no'
+            || (request.resource.data.adultCount == 0 && request.resource.data.childCount == 0))
+        && request.resource.data.authorUid is string
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.submittedAt is timestamp
+        && request.resource.data.submittedAt == request.time;
+
+      allow update: if request.auth != null
+        && responseId == request.auth.uid
+        && resource.data.authorUid == request.auth.uid
+        && request.resource.data.keys().hasAll([
+          'attendance', 'name', 'hosts', 'adultCount', 'childCount', 'authorUid', 'submittedAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'attendance', 'name', 'hosts', 'adultCount', 'childCount', 'authorUid', 'submittedAt'
+        ])
+        && request.resource.data.attendance is string
+        && request.resource.data.attendance in ['yes', 'maybe', 'no']
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 12
+        && request.resource.data.hosts is list
+        && request.resource.data.hosts.size() > 0
+        && request.resource.data.hosts.size() <= 6
+        && request.resource.data.hosts.hasOnly([
+          '이규영', '공정님', '이원종', '고윤석', '백미나', '고가영'
+        ])
+        && request.resource.data.adultCount is int
+        && request.resource.data.childCount is int
+        && request.resource.data.adultCount >= 0
+        && request.resource.data.childCount >= 0
+        && request.resource.data.adultCount <= 20
+        && request.resource.data.childCount <= 20
+        && (request.resource.data.adultCount + request.resource.data.childCount) <= 20
+        && (request.resource.data.attendance != 'yes'
+            || (request.resource.data.adultCount + request.resource.data.childCount) > 0)
+        && (request.resource.data.attendance != 'no'
+            || (request.resource.data.adultCount == 0 && request.resource.data.childCount == 0))
+        && request.resource.data.authorUid is string
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.submittedAt is timestamp
+        && request.resource.data.submittedAt == request.time;
+
+      allow delete: if false;
+    }
+
+    // 관리자 UID 등록 컬렉션
+    match /wedding_admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+  }
+}`;
+    $("#rulesPreview").textContent = ADMIN_RULES;
+
+    function flash(msg){toast.textContent=msg;toast.classList.add("show");setTimeout(()=>toast.classList.remove("show"),1800)}
+    function esc(value){return String(value??"").replace(/[&<>\"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+    function dateText(ts){
+      try{
+        const d = ts?.toDate ? ts.toDate() : new Date(ts);
+        if(Number.isNaN(d.getTime())) return "-";
+        return new Intl.DateTimeFormat("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit",hour12:false}).format(d);
+      }catch{return "-"}
+    }
+    function counts(rows){
+      return rows.reduce((a,r)=>{a.total++; if(r.attendance in a) a[r.attendance]++; return a},{total:0,yes:0,maybe:0,no:0});
+    }
+    function renderSummary(){
+      const c=counts(allRows);
+      $("#totalCount").textContent=c.total; $("#yesCount").textContent=c.yes; $("#maybeCount").textContent=c.maybe; $("#noCount").textContent=c.no;
+    }
+    function renderHosts(){
+      hostGrid.innerHTML = HOSTS.map(host=>{
+        const c=counts(allRows.filter(r=>r.hosts.includes(host)));
+        const active=hostFilter===host?" active":"";
+        return `<button class="host-card${active}" data-host="${esc(host)}">
+          <div class="host-top"><span class="host-name">${esc(host)}</span><span class="host-total">${c.total}<small style="font-size:11px;color:var(--muted)"> 명</small></span></div>
+          <div class="host-stats">
+            <div class="host-stat yes"><b>${c.yes}</b><span>참석</span></div>
+            <div class="host-stat maybe"><b>${c.maybe}</b><span>아직</span></div>
+            <div class="host-stat no"><b>${c.no}</b><span>불참</span></div>
+          </div>
+        </button>`;
+      }).join("");
+      hostGrid.querySelectorAll("[data-host]").forEach(btn=>btn.addEventListener("click",()=>{
+        hostFilter=btn.dataset.host; renderHosts(); renderList();
+        document.querySelector(".list-card").scrollIntoView({behavior:"smooth",block:"start"});
+      }));
+    }
+    function filteredRows(){
+      const q=searchInput.value.trim().toLowerCase();
+      return allRows.filter(r=>(!hostFilter||r.hosts.includes(hostFilter)) && (statusFilter==="all"||r.attendance===statusFilter) && (!q||r.name.toLowerCase().includes(q)));
+    }
+    function renderList(){
+      const rows=filteredRows();
+      listTitle.textContent=hostFilter?`${hostFilter} 손님 리스트`:"전체 손님 리스트";
+      listSub.textContent=`응답자 ${rows.length}명${hostFilter?` · 전체 ${allRows.filter(r=>r.hosts.includes(hostFilter)).length}명`:""}`;
+      clearHost.hidden=!hostFilter;
+      rowsEl.innerHTML=rows.map(r=>`<tr>
+        <td class="name">${esc(r.name)}</td>
+        <td><span class="badge ${esc(r.attendance)}">${esc(STATUS_LABEL[r.attendance]||r.attendance)}</span></td>
+        <td><div class="chips">${r.hosts.map(h=>`<span class="chip">${esc(h)}</span>`).join("")}</div></td>
+        <td>${esc(dateText(r.submittedAt))}</td>
+      </tr>`).join("");
+      emptyState.hidden=rows.length>0;
+      $("table").style.display=rows.length?"table":"none";
+    }
+    function renderAll(){renderSummary();renderHosts();renderList()}
+
+    async function startRealtime(user){
+      if(unsubscribe) unsubscribe();
+      setupCard.hidden=true;
+      const q=query(collection(db,"wedding_rsvp"),orderBy("submittedAt","desc"));
+      unsubscribe=onSnapshot(q,snap=>{
+        allRows=snap.docs.map(d=>{
+          const v=d.data();
+          return {id:d.id,name:String(v.name||""),attendance:String(v.attendance||""),hosts:Array.isArray(v.hosts)?v.hosts.filter(h=>HOSTS.includes(h)):[],submittedAt:v.submittedAt};
+        });
+        loginCard.hidden=true; dashboard.hidden=false; setupCard.hidden=true; renderAll();
+      },err=>{
+        console.error(err);
+        dashboard.hidden=true;
+        if(err.code==="permission-denied"){
+          setupCard.hidden=false; $("#adminUid").textContent=user.uid;
+        }else{
+          loginCard.hidden=false; loginStatus.textContent=`데이터를 불러오지 못했습니다: ${err.message}`;
+        }
+      });
+    }
+
+    loginBtn.addEventListener("click",async()=>{
+      loginBtn.disabled=true; loginStatus.textContent="Google 로그인 창을 여는 중…";
+      try{await signInWithPopup(auth,provider)}catch(err){
+        if(["auth/popup-blocked","auth/cancelled-popup-request"].includes(err.code)) await signInWithRedirect(auth,provider);
+        else loginStatus.textContent=`로그인 실패: ${err.message}`;
+      }finally{loginBtn.disabled=false}
+    });
+    logoutBtn.addEventListener("click",()=>signOut(auth));
+    $("#copyUid").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("#adminUid").textContent);flash("UID를 복사했습니다") }catch{flash("UID를 길게 눌러 복사해주세요")}});
+    clearHost.addEventListener("click",()=>{hostFilter="";renderHosts();renderList()});
+    searchInput.addEventListener("input",renderList);
+    $("#statusFilters").addEventListener("click",e=>{
+      const btn=e.target.closest("[data-status]"); if(!btn)return;
+      statusFilter=btn.dataset.status;
+      document.querySelectorAll("[data-status]").forEach(x=>x.classList.toggle("active",x===btn));
+      renderList();
+    });
+    $("#exportBtn").addEventListener("click",()=>{
+      const rows=filteredRows();
+      const csv=[ ["이름","참석여부","누구의 손님","응답시간"], ...rows.map(r=>[r.name,STATUS_LABEL[r.attendance]||r.attendance,r.hosts.join(" / "),dateText(r.submittedAt)]) ]
+        .map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\r\n");
+      const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+      const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`wedding-rsvp-${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(a.href);
+    });
+
+    onAuthStateChanged(auth,user=>{
+      if(!user){
+        if(unsubscribe){unsubscribe();unsubscribe=null}
+        allRows=[]; dashboard.hidden=true; setupCard.hidden=true; loginCard.hidden=false; logoutBtn.hidden=true; userPill.style.display="none"; loginStatus.textContent=""; return;
+      }
+      loginCard.hidden=true; logoutBtn.hidden=false; userPill.style.display="block"; userPill.textContent=user.email||"관리자";
+      startRealtime(user);
+    });
+  </script>
+</body>
+</html>

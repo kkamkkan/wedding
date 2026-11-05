@@ -1,0 +1,68 @@
+/* 2026-11-05: preserve the invitation palette, improve reading and navigation. */
+:root { --muted:#74655e; --line:rgba(104,82,72,.18); }
+body { background:#eee7e1; }
+body::before, body::after, .hero-sparkles { display:none; }
+.site { background:#fcf9f6; box-shadow:0 0 64px #49372a0d; }
+section { scroll-margin-top:24px; padding-top:76px; padding-bottom:76px; }
+.section-desc { color:var(--muted); }
+.eyebrow { color:#966451; letter-spacing:.26em; }
+.hero { padding-bottom:42px; }
+.hero-photo-wrap { height:68svh; min-height:380px; max-height:680px; }
+.hero-overlay { bottom:30px; }
+.hero-overlay .names { font-size:clamp(32px,8.4vw,46px); line-height:1.12; }
+.hero-summary { padding:30px 20px 0; }
+.hero-summary strong { font-size:18px; }
+.hero-summary span { display:block; margin-top:6px; font-size:14px; }
+.hero-summary.fade-up { opacity:1; transform:none; }
+.scroll-indicator { margin-top:18px; }
+.invitation-copy { font-size:16px; line-height:2.15; }
+.invitation-copy.keep-manual-lines > div { white-space:normal; }
+.auto-fit-line { white-space:normal; overflow:visible; text-overflow:clip; }
+.quote { border-radius:4px; border-width:1px 0; background:transparent; }
+.special-divider { padding:20px 0; }
+.special-divider-track { animation:none; font-size:20px; }
+.person-card { border-radius:100px 100px 16px 16px; }
+.person-body { padding:22px 12px; }
+.map-label { font-size:11px; color:#64544d; letter-spacing:.02em; }
+.location-address { font-size:14px; color:var(--muted); }
+.transport p { font-size:15px; line-height:1.85; color:#6b5c55; }
+.location-name { font-size:21px; }
+.guestbook { padding-bottom:64px; }
+.guestbook-composer, .guestbook-composer.is-active {
+  position:relative; left:auto; bottom:auto; width:100%; margin:26px 0 0;
+  transform:none; opacity:1; visibility:visible; pointer-events:auto;
+  padding:18px; border-radius:16px; box-shadow:none; background:#fffcfa;
+}
+.guestbook-composer::before { display:none; }
+.guestbook-fields { grid-template-columns:1fr; gap:12px; }
+.guestbook-input, .guestbook-textarea, .rsvp-name-input { font-size:16px; }
+.guestbook-textarea { height:100px; min-height:100px; max-height:220px; }
+.guestbook-submit { height:46px; font-size:14px; background:#996650; }
+.guestbook-status { font-size:12px; line-height:1.6; color:#74655e; }
+.sharebar { width:min(calc(100% - 24px),496px); padding:6px; border-radius:18px; }
+.sharebar button,.sharebar a { min-height:44px; font-size:13px; }
+.sharebar .primary { background:#674f43; }
+.music-toggle { right:max(16px,calc((100vw - 520px)/2 + 16px)); width:44px; height:44px; }
+.intro-skip { min-width:64px; min-height:44px; color:#fff; }
+.copy-btn,.contact-btn,.lightbox-close,.rsvp-close { min-height:44px; min-width:44px; }
+button:focus-visible,a:focus-visible,summary:focus-visible {
+  outline:2px solid #835842; outline-offset:4px;
+}
+.footer { padding-bottom:130px; }
+@media(max-width:390px) {
+  section { padding-left:22px; padding-right:22px; }
+  .hero { padding-left:0; padding-right:0; }
+  .guestbook { padding-bottom:64px; }
+  .guestbook-composer { width:100%; bottom:auto; padding:16px; }
+  .guestbook-fields { grid-template-columns:1fr; }
+}
+@media(prefers-reduced-motion:reduce) {
+  html { scroll-behavior:auto; }
+  *,*::before,*::after { animation:none!important; transition:none!important; }
+  .fade-up { opacity:1; transform:none; }
+}
+
+/* Unified serif typography; existing sans-serif elements retain their fonts. */
+h1,h2,.person-name,.location-name { font-weight:600; }
+.hero-overlay .names { font-size:clamp(26px,7vw,36px); font-weight:400; letter-spacing:0; line-height:1.3; }
+.footer-names { font-weight:400; line-height:1.35; }

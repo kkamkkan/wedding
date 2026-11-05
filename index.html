@@ -27,14 +27,14 @@
     }
     @font-face{
       font-family:"MaruBuri";
-      src:url("font/MaruBuri-Light(1).ttf") format("truetype");
+      src:url("font/MaruBuri-Light.ttf") format("truetype");
       font-weight:300;
       font-style:normal;
       font-display:swap;
     }
     @font-face{
       font-family:"MaruBuri";
-      src:url("font/MaruBuri-Regular(1).ttf") format("truetype");
+      src:url("font/MaruBuri-Regular.ttf") format("truetype");
       font-weight:400;
       font-style:normal;
       font-display:swap;
@@ -65,10 +65,10 @@
       --white:#fff;
       --shadow:0 20px 60px rgba(66,45,37,.10);
       --shadow-soft:0 14px 30px rgba(79,55,45,.08);
-      --serif:"Noto Serif KR",serif;
-      --display:"Cormorant Garamond",Georgia,serif;
+      --serif:"MaruBuri",serif;
+      --display:"MaruBuri",serif;
       --sans:"Noto Sans KR",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
-      --body-font:"MaruBuri","Noto Serif KR",serif;
+      --body-font:"MaruBuri",serif;
     }
 
     *{box-sizing:border-box}
@@ -1711,6 +1711,7 @@
     }
 
   </style>
+  <link rel="stylesheet" href="refinements.css">
   <link rel="preload" href="music/wedding.mp3" as="audio" type="audio/mpeg">
 </head>
 
@@ -1940,7 +1941,7 @@
   <main class="site" id="mainContent">
     <section class="hero" id="hero">
       <div class="hero-photo-wrap">
-        <img class="hero-photo" id="heroImage" alt="신랑 신부 메인 사진">
+        <img class="hero-photo" id="heroImage" fetchpriority="high" decoding="async" alt="신랑 신부 메인 사진">
         <div class="hero-sparkles" aria-hidden="true">
           <i class="sparkle s1"></i>
           <i class="sparkle s2"></i>
@@ -2081,16 +2082,17 @@
       <p class="guestbook-intro fade-up">두 사람의 새로운 시작에<br>따뜻한 한마디를 남겨주세요.</p>
       <div class="guestbook-list fade-up" id="guestbookList" aria-live="polite"></div>
       <button class="guestbook-more" id="guestbookMore" type="button">더 보기</button>
-    </section>
-
     <form class="guestbook-composer" id="guestbookComposer" autocomplete="off" aria-label="축하 메시지 작성">
       <div class="guestbook-fields">
         <input class="guestbook-input" id="guestbookName" name="guestbookName" type="text" maxlength="12" placeholder="이름" aria-label="이름" required>
         <textarea class="guestbook-textarea" id="guestbookMessage" name="guestbookMessage" maxlength="120" placeholder="💗 축하 메시지를 남겨주세요" aria-label="축하 메시지" required></textarea>
       </div>
       <button class="guestbook-submit" id="guestbookSubmit" type="submit">등록하기</button>
-      <div class="guestbook-status" id="guestbookStatus">이 구간을 보는 동안 작성창이 함께 따라옵니다.</div>
+      <div class="guestbook-status" id="guestbookStatus">등록한 축하 메시지는 모든 하객에게 공개됩니다.</div>
     </form>
+    </section>
+
+
 
     <section class="location" id="location">
       <div class="section-head fade-up">
@@ -2142,8 +2144,8 @@
   </main>
 
   <div class="sharebar" aria-label="하단 메뉴">
-    <button type="button" id="shareBtn">맨위로</button>
-    <button type="button" id="copyLinkBtn">웨딩사진 구경하기</button>
+    <button type="button" id="shareBtn">처음으로</button>
+    <button type="button" id="copyLinkBtn">웨딩사진</button>
     <a class="primary" id="callVenueBtn" href="#location">오시는 길</a>
   </div>
 
@@ -2402,7 +2404,7 @@
   function addImageFallback(img){
     img.addEventListener("error", ()=>{
       img.classList.add("image-load-error");
-      img.alt = "이미지를 불러올 수 없습니다. Google Drive 공유 권한과 파일 ID를 확인해주세요.";
+      img.alt = "사진을 불러오지 못했습니다. 잠시 후 다시 확인해주세요.";
     });
   }
 
@@ -2724,6 +2726,8 @@
     greetingPhoto.hidden = false;
     greetingPhotoPlaceholder.style.display = "none";
     addImageFallback(greetingPhoto);
+  } else {
+    greetingPhoto.closest(".greeting-photo-section").hidden = true;
   }
 
   $("#footerNames").innerHTML = `${cfg.couple.groomEnglish}<br>&amp;<br>${cfg.couple.brideEnglish}`;
@@ -3027,25 +3031,6 @@
       messageInput.style.height = "43px";
       messageInput.style.height = Math.min(92,Math.max(43,messageInput.scrollHeight)) + "px";
     });
-
-    /* 축하메시지 구간에서만 작성 박스가 화면 하단을 따라오도록 제어 */
-    let ticking = false;
-    function updateComposerVisibility(){
-      ticking = false;
-      const rect = section.getBoundingClientRect();
-      const viewportH = window.innerHeight || document.documentElement.clientHeight;
-      const active = rect.top < viewportH * .72 && rect.bottom > 150;
-      composer.classList.toggle("is-active",active);
-      composer.setAttribute("aria-hidden",String(!active));
-    }
-    function requestComposerUpdate(){
-      if(ticking) return;
-      ticking = true;
-      requestAnimationFrame(updateComposerVisibility);
-    }
-    window.addEventListener("scroll",requestComposerUpdate,{passive:true});
-    window.addEventListener("resize",requestComposerUpdate,{passive:true});
-    updateComposerVisibility();
 
     connectFirebase();
   })();
@@ -3393,236 +3378,7 @@
 
   if(new URLSearchParams(location.search).get("guide")==="1") document.body.classList.add("show-guide");
   </script>
-  <script>
-  /* =========================================================
-     모바일 자동 폰트 크기 조절
-     - 기준 화면 폭: 430px
-     - 작은 휴대폰에서는 전체 폰트를 화면 폭에 맞춰 같은 비율로 축소
-     - 핵심 한 줄 정보는 실제 렌더링 너비를 측정해 추가 자동 맞춤
-     - 초대 본문은 가장 긴 줄을 기준으로 본문 전체를 같은 크기로 맞춤
-     ========================================================= */
-  (function(){
-    const DESIGN_WIDTH = 430;
-    const MIN_GLOBAL_SCALE = 0.70;
-    const MAX_GLOBAL_SCALE = 1;
 
-    const TYPO_SELECTORS = [
-      ".site h2",
-      ".site .section-desc",
-      ".site .invitation-copy",
-      ".site .quote",
-      ".site .hero-overlay .date",
-      ".site .hero-summary strong",
-      ".site .hero-summary span",
-      ".site .person-name",
-      ".site .mbti",
-      ".site .hobbies",
-      ".site .person-note",
-      ".site .family-box",
-      ".site .contact-btn",
-      ".site .date-big .month",
-      ".site .date-big .time",
-      ".site .calendar th",
-      ".site .calendar td",
-      ".site .count-item b",
-      ".site .count-item span",
-      ".site .gallery-more",
-      ".site .location-name",
-      ".site .location-address",
-      ".site .map-label",
-      ".site .transport b",
-      ".site .transport p",
-      ".site .guestbook-name",
-      ".site .guestbook-date",
-      ".site .guestbook-message",
-      ".site .guestbook-input",
-      ".site .guestbook-textarea",
-      ".site .guestbook-submit",
-      ".site .rsvp-question",
-      ".site .rsvp-question-sub",
-      ".site .rsvp-saved",
-      ".rsvp-dialog-head h3",
-      ".rsvp-selected-state",
-      ".rsvp-privacy-note",
-      ".rsvp-pending-title",
-      ".rsvp-pending-sub",
-      ".site .info-tab",
-      ".site .info-panel h3",
-      ".site .info-panel p",
-      ".site details.account-group summary",
-      ".site .account-row b",
-      ".site .account-row span",
-      ".site .copy-btn",
-      ".site .footer-message",
-      ".site .footer-date",
-      ".sharebar button",
-      ".sharebar a"
-    ];
-
-    const ONE_LINE_SELECTORS = [
-      "#heroWeddingLine",
-      "#heroVenue",
-      "#weddingDateTitle",
-      "#weddingVenueTitle",
-      "#rsvp .section-head h2",
-      "#rsvpSavedStatus",
-      "#rsvpDialogTitle",
-      ".rsvp-privacy-note",
-      ".rsvp-pending-title",
-      ".rsvp-pending-sub",
-      "#locationName",
-      "#footerMessage"
-    ];
-
-    let textEls = [];
-    let oneLineEls = [];
-    let groupLineEls = [];
-    let resizeTimer = null;
-
-    function collectElements(){
-      const set = new Set();
-      TYPO_SELECTORS.forEach(selector => {
-        document.querySelectorAll(selector).forEach(el => set.add(el));
-      });
-      textEls = Array.from(set);
-
-      textEls.forEach(el => {
-        if(!el.dataset.baseFontSize){
-          const size = parseFloat(getComputedStyle(el).fontSize);
-          if(Number.isFinite(size)) el.dataset.baseFontSize = String(size);
-        }
-      });
-
-      oneLineEls = ONE_LINE_SELECTORS
-        .map(selector => document.querySelector(selector))
-        .filter(Boolean);
-
-      oneLineEls.forEach(el => el.classList.add("auto-fit-line"));
-
-      const inviteCopy = document.querySelector("#inviteCopy");
-      groupLineEls = inviteCopy ? [inviteCopy] : [];
-      groupLineEls.forEach(el => el.classList.add("keep-manual-lines"));
-    }
-
-    function globalScale(){
-      const viewportWidth = Math.min(window.innerWidth || DESIGN_WIDTH, 520);
-      return Math.max(
-        MIN_GLOBAL_SCALE,
-        Math.min(MAX_GLOBAL_SCALE, viewportWidth / DESIGN_WIDTH)
-      );
-    }
-
-    function resetOneLine(el){
-      if(el.dataset.scaledFontSize){
-        el.style.fontSize = el.dataset.scaledFontSize + "px";
-      }
-      el.style.letterSpacing = "";
-    }
-
-    function fitOneLine(el){
-      if(!el || !el.clientWidth) return;
-
-      resetOneLine(el);
-
-      let size = parseFloat(getComputedStyle(el).fontSize);
-      const startSize = size;
-      const minSize = startSize * 0.56;
-      let guard = 0;
-
-      while(el.scrollWidth > el.clientWidth + 1 && size > minSize && guard < 80){
-        size -= 0.25;
-        el.style.fontSize = size + "px";
-        guard++;
-      }
-
-      /* 아주 조금 넘치는 경우 자간도 미세하게 줄여 가독성을 보존 */
-      if(el.scrollWidth > el.clientWidth + 1){
-        el.style.letterSpacing = "-0.04em";
-      }
-    }
-
-    function fitGroupManualLines(parent){
-      if(!parent || !parent.clientWidth) return;
-
-      if(parent.dataset.scaledFontSize){
-        parent.style.fontSize = parent.dataset.scaledFontSize + "px";
-      }
-      parent.style.letterSpacing = "";
-
-      const lines = Array.from(parent.children).filter(el => el.textContent.trim());
-      if(!lines.length) return;
-
-      let size = parseFloat(getComputedStyle(parent).fontSize);
-      const startSize = size;
-      const minSize = startSize * 0.68;
-      let guard = 0;
-
-      const overflows = () => lines.some(line => line.scrollWidth > parent.clientWidth + 1);
-      while(overflows() && size > minSize && guard < 90){
-        size -= 0.20;
-        parent.style.fontSize = size + "px";
-        guard++;
-      }
-
-      if(overflows()) parent.style.letterSpacing = "-0.025em";
-    }
-
-    function applyResponsiveTypography(){
-      if(!textEls.length) collectElements();
-
-      const scale = globalScale();
-      document.documentElement.style.setProperty("--mobile-font-scale", scale.toFixed(4));
-
-      textEls.forEach(el => {
-        const base = parseFloat(el.dataset.baseFontSize);
-        if(!Number.isFinite(base)) return;
-
-        const scaled = base * scale;
-        el.dataset.scaledFontSize = String(scaled);
-        el.style.fontSize = scaled.toFixed(2) + "px";
-      });
-
-      requestAnimationFrame(() => {
-        oneLineEls.forEach(fitOneLine);
-        groupLineEls.forEach(fitGroupManualLines);
-      });
-    }
-
-    function scheduleApply(){
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(applyResponsiveTypography, 80);
-    }
-
-    function init(){
-      collectElements();
-      applyResponsiveTypography();
-
-      window.addEventListener("resize", scheduleApply, {passive:true});
-      window.addEventListener("orientationchange", scheduleApply, {passive:true});
-
-      if(document.fonts && document.fonts.ready){
-        document.fonts.ready.then(() => {
-          collectElements();
-          applyResponsiveTypography();
-        });
-      }
-
-      if("ResizeObserver" in window){
-        const site = document.querySelector(".site");
-        if(site){
-          const ro = new ResizeObserver(scheduleApply);
-          ro.observe(site);
-        }
-      }
-    }
-
-    if(document.readyState === "loading"){
-      document.addEventListener("DOMContentLoaded", init, {once:true});
-    }else{
-      init();
-    }
-  })();
-  </script>
 
 </body>
 </html>
